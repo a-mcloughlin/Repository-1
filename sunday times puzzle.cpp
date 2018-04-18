@@ -7,10 +7,7 @@
 
 void main()
 {
-	int i;
-	int j;
-	int k;
-	int num;
+	int i,j,k,num;
 	int mods[1000];
 	int signals[1000][3];
 	int ans[10];
