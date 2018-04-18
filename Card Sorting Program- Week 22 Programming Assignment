@@ -1,0 +1,121 @@
+#include "stdafx.h"
+#include <stdio.h>
+#include "string.h"
+#include "stdarg.h"
+#include "stdlib.h"
+#include "time.h"
+
+typedef enum S { CLUBS, DIAMONDS, HEARTS, SPADES } SUIT;
+char suits[][10] = { "CLUBS", "DIAMONDS", "HEARTS", "SPADES" };
+
+typedef enum F { TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE } FACE;
+char faces[][10] = { "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "JACK", "QUEEN", "KING", "ACE" };
+
+typedef struct
+{
+	SUIT suit;
+	FACE face;
+} card;
+
+typedef struct
+{
+	card cards[5];
+} hand;
+
+hand dealHand(hand handsDealt[], int numHandsDealt);
+
+char * printCard(card aCard);
+
+char * compareCards(card yourCard, card dealersCard);
+
+bool fourAces(hand aHand);
+
+void main()
+{
+	int i = 0;
+	hand myHand, dealersHand;
+	int seed = time(NULL);
+	srand(seed);
+	hand hands[10];
+
+	myHand = dealHand(hands, 0);
+	hands[0] = myHand;
+	dealersHand = dealHand(hands, 1);
+	while (i<5)
+	{
+		printf("card#%d: %s (you) vs. %s (dealer). Winner: %s \n", i + 1, printCard(myHand.cards[i]), printCard(dealersHand.cards[i]), compareCards(myHand.cards[i], dealersHand.cards[i]));
+		i++;
+	}
+
+	while (1)
+	{
+		myHand = dealHand(hands, 0);
+
+		if (fourAces(myHand)) break;
+		i++;
+	}
+	printf("\n4 aces found after %d hands \n\n\n", i);
+}
+
+char * compareCards(card yourCard, card dealersCard)
+{
+	char * sptr;
+	sptr = (char *)malloc(10 * sizeof(char));
+
+	if (yourCard.face > dealersCard.face)
+		sptr = ("You");
+	else if (yourCard.face < dealersCard.face)
+		sptr = ("Dealer");
+	else if (yourCard.face == dealersCard.face)
+		sptr = ("Draw");
+
+	return sptr;
+}
+
+char * printCard(card aCard)
+{
+	char * sptr;
+	int size = strlen(suits[aCard.suit]) + strlen(" of ") + strlen(faces[aCard.face]) + 1;
+	sptr = (char *)malloc(50 * sizeof(char));
+	strcpy(sptr, (faces[aCard.face]));
+	strcat(sptr, " of ");
+	strcat(sptr, (suits[aCard.suit]));
+	return sptr;
+}
+
+hand dealHand(hand handsDealt[], int numHands)
+{
+	int i, j, k;
+	hand newHand;
+	SUIT newSuit;
+	FACE newFace;
+
+	for (j = 0;j < 5;j++) {
+		newSuit = S((rand()-7*numHands) % 4);
+		newFace = F((rand() - 7 * numHands) % 13);
+		newHand.cards[j].suit = S(newSuit);
+		newHand.cards[j].face = F(newFace);
+		for (i = 0;i < 5&&i<j;i++) {
+			if (newHand.cards[j].suit == newHand.cards[i].suit&&newHand.cards[j].face == newHand.cards[i].face) {
+				j--;
+				break;
+			}
+			for (k = 0;k <5&&k<j;k++) {
+				if (newHand.cards[j].suit == handsDealt[k].cards[i].suit&&newHand.cards[j].face == handsDealt[k].cards[i].face)
+					j--;
+			}
+		}
+	}
+	return newHand;
+}
+
+bool fourAces(hand aHand)
+{
+	int i;
+	int numAces = 0;
+	bool fourAces = false;
+	for (i = 0;i<5;i++)
+		if (aHand.cards[i].face == ACE)numAces++;
+	if (numAces >= 4)fourAces = true;
+	return fourAces;
+}
